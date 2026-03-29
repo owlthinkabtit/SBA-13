@@ -22,6 +22,45 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+router.get('/', async (req, res) => {
+  try {
+    const { category, minPrice, maxPrice, sortBy, page = 1, limit = 10 } = req.query;
+
+    let queryObj = {};
+    if (category) {
+      queryObj.category = category;
+    }
+
+    if (minPrice || maxPrice) {
+      queryObj.price = {};
+      if (minPrice) queryObj.price.$gte = Number(minPrice);
+      if (maxPrice) queryObj.price.$lte = Number(maxPrice);
+    }
+
+    let result = Product.find(queryObj);
+
+    if (sortBy) {
+      const [field, order] = sortBy.split('_');
+      result = result.sort({ [field]: order === 'desc' ? -1 : 1 });
+    } else {
+      result = result.sort('-createdAt');
+    }
+
+    const skip = (Number(page) - 1) * Number(limit);
+    result = result.skip(skip).limit(Number(limit));
+
+    const products = await result;
+
+    res.json({
+      count: products.length,
+      page: Number(page), 
+      products
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.put('/:id', async (req, res) => {
   try {
     const updatedProduct = await Product.findByIdAndUpdate(
