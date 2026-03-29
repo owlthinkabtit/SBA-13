@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import connectDB from './config/connection.js';
-import productRoutes from '/routes/prodctRoutes.js';
+import productRoutes from "./routes/productRoutes.js"
 
 const app = express();
 const port = process.env.PORT || 3001;
